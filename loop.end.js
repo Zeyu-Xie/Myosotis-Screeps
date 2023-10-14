@@ -9,7 +9,7 @@
 
 var loopEnd = function () {
     console.log("Loop Ends")
-    console.log("--------")
+    console.log("========")
     console.log("\n")
 }
 
