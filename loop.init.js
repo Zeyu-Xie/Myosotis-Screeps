@@ -8,6 +8,7 @@
  */
 
 var loopInit = function () {
+    console.log("--------")
     console.log("Loop Starts")
 }
 
