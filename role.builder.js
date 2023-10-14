@@ -3,15 +3,17 @@ var roleBuilder = {
     /** @param {Creep} creep **/
     run: function(creep) {
 
+		// 收集能量
 	    if(creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.building = false;
             creep.say('🔄 harvest');
 	    }
+		// 使用能量建造
 	    if(!creep.memory.building && creep.store.getFreeCapacity() == 0) {
 	        creep.memory.building = true;
 	        creep.say('🚧 build');
 	    }
-
+		// 正在建造：显示路径
 	    if(creep.memory.building) {
 	        var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
             if(targets.length) {
@@ -20,6 +22,7 @@ var roleBuilder = {
                 }
             }
 	    }
+		// 未在建造：显示路径
 	    else {
 	        var sources = creep.room.find(FIND_SOURCES);
             if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
