@@ -9,6 +9,8 @@
 
 var loopInit = function () {
     console.log("--------")
+    console.log(Date())
+    console.log("--------")
     console.log("Loop Starts")
 }
 
