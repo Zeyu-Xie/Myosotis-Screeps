@@ -1,4 +1,6 @@
-var init1 = function () {
+var loopInit = function () {
+    console.log("========")
+    console.log(Date())
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
             delete Memory.creeps[name];
@@ -12,12 +14,6 @@ var init1 = function () {
     console.log('Harvesters: ' + harvesters.length);
     console.log('Upgraders: ' + upgraders.length);
     console.log('Builders: ' + builders.length);
-}
-
-var loopInit = function () {
-    console.log("========")
-    console.log(Date())
-    init1()
     console.log("--------")
     console.log("Loop Starts")
 }

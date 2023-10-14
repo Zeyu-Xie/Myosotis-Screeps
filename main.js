@@ -3,8 +3,8 @@ var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 
 var func = require('func');
-var loopInit = require("loop.init")
-var loopEnd = require("loop.end")
+var loopInit = require("loopInit")
+var loopEnd = require("loopEnd")
 
 module.exports.loop = function () {
     
@@ -14,7 +14,6 @@ module.exports.loop = function () {
     work()
     
     loopEnd()
-    
 }
 
 var work = function () {
