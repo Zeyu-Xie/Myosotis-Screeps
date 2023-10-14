@@ -2,6 +2,10 @@ var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+
+        // 说废话
+        if(Math.random()<0.1) creep.say("加班快乐")
+
         // 去采集能量
 	    if(creep.store.getFreeCapacity() > 0) {
             var sources = creep.room.find(FIND_SOURCES);
