@@ -50,28 +50,34 @@ var spawn = function () {
 
     var energyAvailable = Game.spawns["Spawn1"].room.energyAvailable
     var energyCapacityAvailable = Game.spawns["Spawn1"].room.energyCapacityAvailable
-    // console.log(energyAvailable, energyCapacityAvailable)
 
     if (harvesters.length < 2) {
         var newName = 'Harvester' + Game.time;
         console.log('Spawning new harvester: ' + newName);
-        if(energyCapacityAvailable < 550) {
+        if (energyCapacityAvailable < 550) {
             Game.spawns['Spawn1'].spawnCreep([MOVE, CARRY, WORK], newName,
                 { memory: { role: 'harvester' } });
         }
         else Game.spawns['Spawn1'].spawnCreep([MOVE, CARRY, MOVE, WORK, WORK, WORK, WORK], newName,
             { memory: { role: 'harvester' } });
     }
-    if (upgraders.length < 1) {
+    if (upgraders.length < 2) {
         var newName = 'Upgrader' + Game.time;
         console.log('Spawning new upgrader: ' + newName);
-        Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
-            { memory: { role: 'upgrader' } });
+        if (energyCapacityAvailable < 550) {
+            Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
+                { memory: { role: 'upgrader' } });
+        }
+        else {
+            Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE, WORK, WORK, WORK, MOVE], newName,
+                { memory: { role: 'upgrader' } });
+        }
+
     }
     if (builders.length < 3) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
-        if(energyCapacityAvailable <550) {
+        if (energyCapacityAvailable < 550) {
             Game.spawns['Spawn1'].spawnCreep([MOVE, CARRY, WORK], newName,
                 { memory: { role: 'builder' } });
         }
@@ -83,8 +89,14 @@ var spawn = function () {
     if (repairers.length < 2) {
         var newName = 'Repairer' + Game.time;
         console.log('Spawning new repairer: ' + newName);
-        Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
-            { memory: { role: 'repairer' } });
+        if (energyCapacityAvailable < 550) {
+            Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
+                { memory: { role: 'repairer' } });
+        }
+        else {
+            Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE, WORK, WORK, WORK, MOVE], newName,
+                { memory: { role: 'repairer' } });
+        }
     }
     if (healers.length < 0) {
         var newName = 'Healer' + Game.time;
