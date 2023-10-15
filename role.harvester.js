@@ -1,10 +1,13 @@
+const slogan = require("slogan");
+
 var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
 
         // 说废话
-        if(Math.random()<0.1) creep.say("加班快乐")
+        const s = slogan("MOOD", 0.1)
+        if(s.length >= 1) creep.say(s)
 
         // 去采集能量
 	    if(creep.store.getFreeCapacity() > 0) {
