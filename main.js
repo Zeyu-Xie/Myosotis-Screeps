@@ -29,7 +29,7 @@ var work = function () {
         if(creep.memory.role == 'harvester') {
             roleHarvester.run(creep);
         }
-    }1
+    }
 }
 
 var spawn = function () {
