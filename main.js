@@ -11,7 +11,7 @@ const slogan = require('slogan');
 // 初始化
 const roleMap = new Map()
 const roleList = ["harvester", "builder", "upgrader", "repairer", "healer"]
-const numList = [10, 7, 2, 3, 0]
+const numList = [8, 6, 2, 3, 0]
 const bodyPartList = [
     [
         [WORK, CARRY, MOVE],
