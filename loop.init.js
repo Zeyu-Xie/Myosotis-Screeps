@@ -18,6 +18,7 @@ var loopInit = function () {
             console.log('Clearing non-existing creep memory:', name);
         }
     }
+    printResourceInfo()
     printStorageInfo()
     printRclInfo()
     printCreepsInfo()
@@ -53,6 +54,17 @@ var printCreepsInfo = function () {
 
     console.log("* Creep Numbers: " + l1)
     console.log("                 " + l2)
+}
+
+var printResourceInfo = function () {
+    var targets = Game.spawns["Spawn1"].room.find(FIND_SOURCES)
+    var res = 0
+    var all = 0
+    for (let i = 0; i < targets.length; i++) {
+        res += targets[i].energy
+        all += targets[i].energyCapacity
+    }
+    console.log("* Resource: Energy: ", res + "/" + all)
 }
 
 var printStorageInfo = function () {
