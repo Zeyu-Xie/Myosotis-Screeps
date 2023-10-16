@@ -77,7 +77,7 @@ var nameStandardize = function () {
     }
 }
 
-var spawn = function () {
+var spawn = function () { 
 
     // 判断是否已在 Spawning
     if (Game.spawns["Spawn1"].spawning) {
@@ -89,7 +89,7 @@ var spawn = function () {
             { align: 'left', opacity: 0.8 });
         return
     }
-
+    
     for (let i = 0; i < roleList.length; i++) {
 
         // 判断数量是否足够
