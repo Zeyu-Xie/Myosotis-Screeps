@@ -6,7 +6,7 @@ var roleHarvester = {
     run: function(creep) {
 
         // 说废话
-        const s = slogan("MOOD", 0.1)
+        const s = slogan("MOOD", 0.05)
         if(s.length >= 1) creep.say(s)
 
         // 去采集能量
