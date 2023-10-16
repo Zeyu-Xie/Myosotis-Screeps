@@ -37,8 +37,8 @@ var printCreepsInfo = function () {
     var repairers = _.filter(Game.creeps, (creep) => creep.memory.role == "repairer");
     var healers = _.filter(Game.creeps, (creep) => creep.memory.role == "healer");
 
-    const strArray = ["harvesters", "upgraders", "builders", "repairers", "healers"]
-    const numArray = [harvesters.length, upgraders.length, builders.length, repairers.length, healers.length]
+    const strArray = ["harvesters", "builders", "upgraders", "repairers", "healers"]
+    const numArray = [harvesters.length, builders.length, upgraders.length, repairers.length, healers.length]
     const num = strArray.length
 
     var l1 = ""
