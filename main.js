@@ -12,6 +12,8 @@ module.exports.loop = function () {
 
     loopInit()
 
+    nameStandardize()
+
     spawn()
     work()
 
@@ -19,23 +21,15 @@ module.exports.loop = function () {
 
 }
 
-var work = function () {
-    for (var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        if (creep.memory.role == 'upgrader') {
-            roleUpgrader.run(creep);
-        }
-        if (creep.memory.role == 'builder') {
-            roleBuilder.run(creep);
-        }
-        if (creep.memory.role == 'harvester') {
-            roleHarvester.run(creep);
-        }
-        if (creep.memory.role == 'repairer') {
-            roleRepairer.run(creep);
-        }
-        if (creep.memory.role == 'healer') {
-            roleHealer.run(creep);
+// 将所有 creep 的名字通过 role 正规化
+var nameStandardize = function () {
+    for (var creep in Game.creeps) {
+        try {
+            var _role = Game.creeps[creep].memory.role;
+            _role = _role.charAt(0).toUpperCase() + _role.slice(1);
+            Game.creeps[creep].name= _role + Game.creeps[creep].name.replace(/[a-zA-Z]/g, '');
+        } catch (err) {
+            console.log("ERROR", err)
         }
     }
 }
@@ -51,7 +45,7 @@ var spawn = function () {
     var energyAvailable = Game.spawns["Spawn1"].room.energyAvailable
     var energyCapacityAvailable = Game.spawns["Spawn1"].room.energyCapacityAvailable
 
-    if (harvesters.length < 2) {
+    if (harvesters.length < 7) {
         var newName = 'Harvester' + Game.time;
         console.log('Spawning new harvester: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -61,7 +55,7 @@ var spawn = function () {
         else Game.spawns['Spawn1'].spawnCreep([MOVE, CARRY, MOVE, WORK, WORK, WORK, WORK], newName,
             { memory: { role: 'harvester' } });
     }
-    if (upgraders.length < 1) {
+    if (upgraders.length < 2) {
         var newName = 'Upgrader' + Game.time;
         console.log('Spawning new upgrader: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -74,7 +68,7 @@ var spawn = function () {
         }
 
     }
-    if (builders.length < 2) {
+    if (builders.length < 7) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -86,7 +80,7 @@ var spawn = function () {
                 { memory: { role: 'builder' } });
         }
     }
-    if (repairers.length < 1) {
+    if (repairers.length < 3) {
         var newName = 'Repairer' + Game.time;
         console.log('Spawning new repairer: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -122,6 +116,27 @@ var spawn = function () {
                 Game.spawns['Spawn1'].pos.x + 1,
                 Game.spawns['Spawn1'].pos.y,
                 { align: 'left', opacity: 0.8 });
+        }
+    }
+}
+
+var work = function () {
+    for (var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if (creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+        if (creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
+        }
+        if (creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if (creep.memory.role == 'repairer') {
+            roleRepairer.run(creep);
+        }
+        if (creep.memory.role == 'healer') {
+            roleHealer.run(creep);
         }
     }
 }
