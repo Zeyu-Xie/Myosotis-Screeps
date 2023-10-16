@@ -4,6 +4,7 @@ const content = {
 }
 
 var slogan = function (type, probability) {
+    return ""
     if (Math.random() > probability) return ""
     switch (type) {
         case "POLITICS": return content.politics[Math.floor(Math.random() * (content.politics.length))]

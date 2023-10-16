@@ -51,7 +51,7 @@ var spawn = function () {
     var energyAvailable = Game.spawns["Spawn1"].room.energyAvailable
     var energyCapacityAvailable = Game.spawns["Spawn1"].room.energyCapacityAvailable
 
-    if (harvesters.length < 7) {
+    if (harvesters.length < 2) {
         var newName = 'Harvester' + Game.time;
         console.log('Spawning new harvester: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -61,7 +61,7 @@ var spawn = function () {
         else Game.spawns['Spawn1'].spawnCreep([MOVE, CARRY, MOVE, WORK, WORK, WORK, WORK], newName,
             { memory: { role: 'harvester' } });
     }
-    if (upgraders.length < 2) {
+    if (upgraders.length < 1) {
         var newName = 'Upgrader' + Game.time;
         console.log('Spawning new upgrader: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -74,7 +74,7 @@ var spawn = function () {
         }
 
     }
-    if (builders.length < 8) {
+    if (builders.length < 2) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -86,7 +86,7 @@ var spawn = function () {
                 { memory: { role: 'builder' } });
         }
     }
-    if (repairers.length < 2) {
+    if (repairers.length < 1) {
         var newName = 'Repairer' + Game.time;
         console.log('Spawning new repairer: ' + newName);
         if (energyCapacityAvailable < 550) {
