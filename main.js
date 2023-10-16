@@ -55,8 +55,6 @@ module.exports.loop = function () {
 
     loopInit()
 
-    nameStandardize()
-
     spawn()
     work()
 
@@ -64,20 +62,7 @@ module.exports.loop = function () {
 
 }
 
-// 将所有 creep 的名字通过 role 正规化
-var nameStandardize = function () {
-    for (var creep in Game.creeps) {
-        try {
-            var _role = Game.creeps[creep].memory.role;
-            _role = _role.charAt(0).toUpperCase() + _role.slice(1);
-            Game.creeps[creep].name = _role + Game.creeps[creep].name.replace(/[a-zA-Z]/g, '');
-        } catch (err) {
-            console.log("ERROR", err)
-        }
-    }
-}
-
-var spawn = function () { 
+var spawn = function () {
 
     // 判断是否已在 Spawning
     if (Game.spawns["Spawn1"].spawning) {
@@ -89,7 +74,7 @@ var spawn = function () {
             { align: 'left', opacity: 0.8 });
         return
     }
-    
+
     for (let i = 0; i < roleList.length; i++) {
 
         // 判断数量是否足够
@@ -105,13 +90,15 @@ var spawn = function () {
         var name = roleList[i][0].toUpperCase() + roleList[i].substring(1) + Game.time
 
         // 判断生产“体型”
-        if (energyAvailable < 550) {
+        if (energyCapacityAvailable < 550) {
             Game.spawns['Spawn1'].spawnCreep(bodyPartList[i][0], name,
                 { memory: { role: roleList[i] } });
+            return
         }
         else {
             Game.spawns['Spawn1'].spawnCreep(bodyPartList[i][1], name,
                 { memory: { role: roleList[i] } });
+            return
         }
     }
 }
