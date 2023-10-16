@@ -51,7 +51,7 @@ var spawn = function () {
     var energyAvailable = Game.spawns["Spawn1"].room.energyAvailable
     var energyCapacityAvailable = Game.spawns["Spawn1"].room.energyCapacityAvailable
 
-    if (harvesters.length < 3) {
+    if (harvesters.length < 7) {
         var newName = 'Harvester' + Game.time;
         console.log('Spawning new harvester: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -74,7 +74,7 @@ var spawn = function () {
         }
 
     }
-    if (builders.length < 6) {
+    if (builders.length < 8) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
         if (energyCapacityAvailable < 550) {
