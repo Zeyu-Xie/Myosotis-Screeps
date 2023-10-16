@@ -27,7 +27,7 @@ var nameStandardize = function () {
         try {
             var _role = Game.creeps[creep].memory.role;
             _role = _role.charAt(0).toUpperCase() + _role.slice(1);
-            Game.creeps[creep].name= _role + Game.creeps[creep].name.replace(/[a-zA-Z]/g, '');
+            Game.creeps[creep].name = _role + Game.creeps[creep].name.replace(/[a-zA-Z]/g, '');
         } catch (err) {
             console.log("ERROR", err)
         }
@@ -36,14 +36,25 @@ var nameStandardize = function () {
 
 var spawn = function () {
 
+    const roleMap = new Map()
+    const roleList = ["harvesters", "builders", "upgraders", "repairers", "healers"]
+    roleMap.set("harvesters", 0)
+    roleMap.set("builders", 1)
+    roleMap.set("upgraders", 2)
+    roleMap.set("repairers", 3)
+    roleMap.set("healers", 4)
+    console.log(roleMap[2])
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
     var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
     var repairers = _.filter(Game.creeps, (creep) => creep.memory.role == "repairer");
     var healers = _.filter(Game.creeps, (creep) => creep.memory.role == "healer");
+    const roles = [harvesters, builders, upgraders, repairers, healers]
 
     var energyAvailable = Game.spawns["Spawn1"].room.energyAvailable
     var energyCapacityAvailable = Game.spawns["Spawn1"].room.energyCapacityAvailable
+
+
 
     if (harvesters.length < 7) {
         var newName = 'Harvester' + Game.time;
@@ -55,7 +66,7 @@ var spawn = function () {
         else Game.spawns['Spawn1'].spawnCreep([MOVE, CARRY, MOVE, WORK, WORK, WORK, WORK], newName,
             { memory: { role: 'harvester' } });
     }
-    if (upgraders.length < 2) {
+    else if (upgraders.length < 2) {
         var newName = 'Upgrader' + Game.time;
         console.log('Spawning new upgrader: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -68,7 +79,7 @@ var spawn = function () {
         }
 
     }
-    if (builders.length < 7) {
+    else if (builders.length < 7) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -80,7 +91,7 @@ var spawn = function () {
                 { memory: { role: 'builder' } });
         }
     }
-    if (repairers.length < 3) {
+    else if (repairers.length < 3) {
         var newName = 'Repairer' + Game.time;
         console.log('Spawning new repairer: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -92,7 +103,7 @@ var spawn = function () {
                 { memory: { role: 'repairer' } });
         }
     }
-    if (healers.length < 0) {
+    else if (healers.length < 0) {
         var newName = 'Healer' + Game.time;
         console.log('Spawning new healer: ' + newName);
         Game.spawns['Spawn1'].spawnCreep([HEAL, CARRY, MOVE], newName,
