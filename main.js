@@ -51,7 +51,7 @@ var spawn = function () {
     var energyAvailable = Game.spawns["Spawn1"].room.energyAvailable
     var energyCapacityAvailable = Game.spawns["Spawn1"].room.energyCapacityAvailable
 
-    if (harvesters.length < 2) {
+    if (harvesters.length < 3) {
         var newName = 'Harvester' + Game.time;
         console.log('Spawning new harvester: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -74,7 +74,7 @@ var spawn = function () {
         }
 
     }
-    if (builders.length < 3) {
+    if (builders.length < 6) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
         if (energyCapacityAvailable < 550) {
@@ -115,7 +115,7 @@ var spawn = function () {
     }
 
     if (!Game.spawns["Spawn1"].spawning) {
-        const s = slogan("POLITICS", 0.5)
+        const s = slogan("POLITICS", 0.1)
         if (s.length >= 1) {
             Game.spawns['Spawn1'].room.visual.text(
                 s,
