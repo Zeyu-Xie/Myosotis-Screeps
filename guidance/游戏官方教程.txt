@@ -1,0 +1,952 @@
+整理ByXuFang(871271203)
+全部复制于官方游戏教程
+
+
+##############################################第一关#####################################################
+
+##############################################第一关#####################################################
+
+##############################################第一关#####################################################
+
+**********************游戏UI与基础编程*****************************
+
+
+
+	您的 Spawn 可以通过 spawnCreep 方法创建名为 “creep” 的新单位。可以在 本文档 中找到该方法的介绍。每个 creep 都有一个名字（name）和一定量的身体部件（body part），不同的身体部件会带来不同的能力。
+您可以使用您 spawn 的名字来获取到它，就像这样：Game.spawns['Spawn1']。
+创建一个身体部件为 [WORK,CARRY,MOVE] 并且名字叫做 Harvester1（这个名字对本教程来说非常重要！）的工人 creep。您可以自己在控制台中输入这些代码，或者复制 & 粘贴下面的提示。
+
+
+Game.spawns['Spawn1'].spawnCreep( [WORK, CARRY, MOVE], 'Harvester1' );
+
+
+
+
+
+
+
+
+
+	想让 creep 去采集能量，您需要使用下面 “文档” 小节中介绍的方法，这些指令每个游戏 tick 都会被执行。而 harvest 方法则需要在 creep 相邻的位置上有一个能量源。
+您可以通过 creep 的名字来获取到它并对其下达命令，就像这样：Game.creeps['Harvester1']。把 FIND_SOURCES 常量作为参数传递给 Room.find 方法可以房间中的能量源。
+通过在 “脚本” 面板中键入代码来让您的 creep 前去采集能量。
+
+
+module.exports.loop = function () {
+    var creep = Game.creeps['Harvester1'];
+    var sources = creep.room.find(FIND_SOURCES);
+    if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(sources[0]);
+    }
+}
+
+
+
+
+
+
+
+	想要维护 extension，您需要教会您的采集单位把能量运输到 extension 而不仅仅是 spawn。为此，您需要使用 Game.structures 对象或者在对应的房间执行 Room.find(FIND_STRUCTURES) 方法进行搜索。无论使用哪种方式，您都需要用判断条件 structure.structureType == STRUCTURE_EXTENSION（或者 structure instanceof StructureExtension）对结果列表进行筛选，还有别忘了检查它们存有多少能量（就像之前检查 creep 一样）。
+	优化 role.harvester 模块中的逻辑。
+	
+	
+var roleHarvester = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+	    if(creep.store.getFreeCapacity() > 0) {
+            var sources = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+        }
+        else {
+            var targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    }
+            });
+            if(targets.length > 0) {
+                if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+        }
+	}
+};
+
+module.exports = roleHarvester;
+
+
+
+
+
+
+	想要了解房间里总共有多少能量可以用于孵化，您可以使用 Room.energyAvailable 属性。让我们把这个属性输出到控制台中以便在 extension 填充期间对其进行追踪。
+	找到全部的 5 个 extension 以及 spawn 并填充能量。
+	
+	
+	
+var roleHarvester = require('role.harvester');
+var roleBuilder = require('role.builder');
+
+module.exports.loop = function () {
+
+    for(var name in Game.rooms) {
+        console.log('Room "'+name+'" has '+Game.rooms[name].energyAvailable+' energy');
+    }
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+	想要让 creep 把能量运送回 spawn，您需要使用 Creep.transfer 方法。但是请记住，这个方法只有在 creep 和 spawn 相邻的时候才能正确执行，所以需要让 creep 先走回来。
+当您把 .store.getFreeCapacity() > 0 作为检查条件添加到代码里时，creep 应该就可以自己一步步的把能量搬运回 spawn 然后走回能量源。
+
+
+module.exports.loop = function () {
+    var creep = Game.creeps['Harvester1'];
+
+    if(creep.store.getFreeCapacity() > 0) {
+        var sources = creep.room.find(FIND_SOURCES);
+        if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(sources[0]);
+        }
+    }
+    else {
+        if( creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE ) {
+            creep.moveTo(Game.spawns['Spawn1']);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+	Nice！现在这个 creep 将会一直作为采集者（harvester）工作直到去世。请记住，几乎所有的 creep 都有 1500 游戏 tick 的生命周期，在此之后它就会 “老去” 然后死掉（这个设定在本教程中并不生效）。
+让我们孵化新的 creep 来帮助第一个。这会消耗掉 200 点能量，所以您可能需要等到采集单位收集到足够的能量。spawnCreep 方法会返回错误码 ERR_NOT_ENOUGH_ENERGY（-6）直到您能量足够为止。
+请记住：想要执行一次性的代码的话，直接在 “控制台” 面板中输入就可以了。
+
+
+Game.spawns['Spawn1'].spawnCreep( [WORK, CARRY, MOVE], 'Harvester2' );
+
+
+
+
+
+
+
+
+
+	第二个 creep 已经就绪了，但是它现在还不会动，所以我们需要将其添加进我们的程序。
+想要给所有的 creep 都设置行为，只需要把整个脚本为新的 creep 复制一遍就好了，但是更好的做法是使用 for 循环来遍历 Game.creeps 中的所有 creep。
+拓展您的程序，使其可以适用到所有 creep 上。
+
+
+module.exports.loop = function () {
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+
+        if(creep.store.getFreeCapacity() > 0) {
+            var sources = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0]);
+            }
+        }
+        else {
+            if(creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(Game.spawns['Spawn1']);
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+	现在，让我们把工作单位的行为逻辑封装到一个单独的 module 里来改善我们的代码。使用模块功能创建一个名为 role.harvester 的模块，您可以在脚本编辑器的左侧找到它。然后在 module.exports 对象中定义一个 run 函数来存放 creep 的行为逻辑。
+
+
+var roleHarvester = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+	    if(creep.store.getFreeCapacity() > 0) {
+            var sources = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0]);
+            }
+        }
+        else {
+            if(creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(Game.spawns['Spawn1']);
+            }
+        }
+	}
+};
+
+module.exports = roleHarvester;
+
+
+
+
+
+	现在，您可以重写 main 模块的代码，只留下 loop 函数，并通过 require('role.harvester') 方法调用您的新模块。
+	将 role.harvester 模块引入到 main 模块中。
+
+
+var roleHarvester = require('role.harvester');
+
+module.exports.loop = function () {
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        roleHarvester.run(creep);
+    }
+}
+
+
+
+
+##############################################第二关#####################################################
+
+##############################################第二关#####################################################
+
+##############################################第二关#####################################################
+
+**********************升级控制器*****************************
+
+
+
+	您将需要一个新 creep 工作单位去升级您的控制器等级，让我们称其为 “Upgrader1”。在接下来的章节中我们将介绍如何自动创建 creep，但是现在让我们还是和之前一样在控制器里输入下面的命令。
+
+Game.spawns['Spawn1'].spawnCreep( [WORK, CARRY, MOVE], 'Upgrader1' );
+
+
+
+
+
+
+
+
+    
+    为此，我们需要利用每个 creep 都有的 memory 属性，该属性允许在 creep 的“内存”中写入自定义信息。这样，我们就可以给 creep 分配不同的角色。
+您将需要一个新 creep 工作单位去升级您的控制器等级，让我们称其为 “Upgrader1”。在接下来的章节中我们将介绍如何自动创建 creep，但是现在让我们还是和之前一样在控制器里输入下面的命令。
+您储存的所有内存信息可以通过全局对象 内存 访问。这两种方式您想用哪种都可以。
+	使用控制台将属性 role='harvester' 写入采集单位的内存，将 role='upgrader' 写入升级单位的内存。
+
+
+Game.creeps['Harvester1'].memory.role = 'harvester';
+Game.creeps['Upgrader1'].memory.role = 'upgrader';
+
+
+
+
+
+
+
+
+	您可以在左侧的 creep 信息面板或者 “内存” 面板中查看您 creep 的内存。
+现在，让我们来定义新 creep 的行为逻辑。两种 creep 都需要采集能量，但是角色为 harvester 的 creep 需要把能量带回到 spawn，而角色为 upgrader 的 creep 需要走到 controller 旁然后对其执行 upgradeController 方法（您可以通过 Creep.room.controller 属性获取到 creep 所在房间的 controller 对象）。
+为此，我们需要创建一个名为 role.upgrader 的新模块。
+	创建名为 role.upgrader 的新模块，并写入您新 creep 的行为逻辑。
+
+
+var roleUpgrader = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+	    if(creep.store[RESOURCE_ENERGY] == 0) {
+            var sources = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0]);
+            }
+        }
+        else {
+            if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(creep.room.controller);
+            }
+        }
+	}
+};
+
+module.exports = roleUpgrader;
+
+
+
+
+
+
+
+
+
+
+	在我们的 main 模块中，所有的 creep 都在扮演相同的角色。我们需要使用先前定义的 Creep.memory.role 属性区分它们的行为，注意不要忘记导入新模块哦。
+将 role.upgrader 模块中的逻辑应用到拥有 upgrader 角色的 creep 身上并检查其表现。
+
+
+var roleHarvester = require('role.harvester');
+var roleUpgrader = require('role.upgrader');
+
+module.exports.loop = function () {
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+###############################################第三关##################################################
+
+###############################################第三关##################################################
+
+###############################################第三关##################################################
+
+*************************建造建筑*****************************
+
+
+
+
+
+
+	控制器升级解锁了新的建筑：wall、rampart 以及 extension。我们将在下个教程部分讨论 wall 和 rampart，现在让我们先来了解一下 extension。
+Extension 被用来孵化更大型的 creep。每种身体类型只有一个部件的 creep 工作并不高效。多为其添加几个 WORK 部件可以让它们成比例的提高效率。
+但是，这样的 creep 会更加的昂贵，并且单独一个 spawn 只能容纳最多 300 点能量。想要孵化成本超过 300 点能量的 creep，您需要 spawn 拓展（即 extension）。
+
+
+	二级 controller 将允许您建造 5 个 extension。每次 controller 升级都会解锁更多的 extension。
+您可以在您房间中的任何位置放置 extension，并且 spawn 可以无视彼此之间的距离直接使用 extension 中的能量。为了方便起见，我们已经放置好了对应的建筑工地（construction site）。
+
+
+
+
+
+
+
+
+
+
+	让我们创建一个用于建造建筑的新 creep。这个过程和之前的教程章节类似。但是这次我们将使用 Spawn.spawnCreep 方法的第三个参数直接为新的 creep 设置 memory。
+孵化一个身体部件为 [WORK,CARRY,MOVE]，名字为 Builder1，并且内存为 {role:'builder'} 的 creep。
+
+
+Game.spawns['Spawn1'].spawnCreep( [WORK, CARRY, MOVE], 'Builder1',
+    { memory: { role: 'builder' } } );
+
+
+
+
+
+
+
+
+
+
+
+	和之前一样，我们把这个角色放到单独的模块 role.builder 中。建造是通过对建筑工地执行 Creep.build 方法进行的，而工地则可以通过 Room.find(FIND_CONSTRUCTION_SITES) 搜索得到。建造建筑需要能量，您的 creep 应该自己去采集它们。
+为了避免由于身上资源耗尽而频繁的来回移动，让我们通过添加一个新的布尔变量 creep.memory.building 来增强一下代码，这个变量将会告诉 creep 应该何时切换任务。我们还调用了 creep.say 并且在 moveTo 方法中添加了 visualizePathStyle 选项来可视化 creep 的移动路径。
+	创建一个名为 role.builder 的模块，并写入新 creep 的行为逻辑。
+文档：
+RoomObject.room
+Room.find
+Creep.build
+Creep.say
+
+
+var roleBuilder = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+
+	    if(creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
+            creep.memory.building = false;
+            creep.say('🔄 harvest');
+	    }
+	    if(!creep.memory.building && creep.store.getFreeCapacity() == 0) {
+	        creep.memory.building = true;
+	        creep.say('🚧 build');
+	    }
+
+	    if(creep.memory.building) {
+	        var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+            if(targets.length) {
+                if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
+                //移动时画线
+                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+	    }
+	    else {
+	        var sources = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+	    }
+	}
+};
+
+module.exports = roleBuilder;
+
+
+
+
+
+
+
+
+	让我们在 main 模块中引用新的角色并瞧瞧会发生什么。
+	通过在新 creep 上应用 role.builder 模块来建造全部 5 个 extension。
+	
+	
+	
+var roleHarvester = require('role.harvester');
+var roleBuilder = require('role.builder');
+
+module.exports.loop = function () {
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
+        }
+    }
+}
+
+
+
+
+想要维护 extension，您需要教会您的采集单位把能量运输到 extension 而不仅仅是 spawn。为此，您需要使用 Game.structures 对象或者在对应的房间执行 Room.find(FIND_STRUCTURES) 方法进行搜索。无论使用哪种方式，您都需要用判断条件 structure.structureType == STRUCTURE_EXTENSION（或者 structure instanceof StructureExtension）对结果列表进行筛选，还有别忘了检查它们存有多少能量（就像之前检查 creep 一样）。
+
+优化 role.harvester 模块中的逻辑。
+文档：
+Game.structures
+Room.find
+StructureExtension
+
+
+var roleHarvester = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+	    if(creep.store.getFreeCapacity() > 0) {
+            var sources = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+        }
+        else {
+            var targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    }
+            });
+            if(targets.length > 0) {
+                if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+        }
+	}
+};
+
+module.exports = roleHarvester;
+
+
+
+
+
+
+
+
+
+想要了解房间里总共有多少能量可以用于孵化，您可以使用 Room.energyAvailable 属性。让我们把这个属性输出到控制台中以便在 extension 填充期间对其进行追踪。
+
+找到全部的 5 个 extension 以及 spawn 并填充能量。
+文档：
+Room.energyAvailable
+
+
+var roleHarvester = require('role.harvester');
+var roleBuilder = require('role.builder');
+
+module.exports.loop = function () {
+
+    for(var name in Game.rooms) {
+        console.log('Room "'+name+'" has '+Game.rooms[name].energyAvailable+' energy');
+    }
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
+        }
+    }
+}
+
+
+
+
+
+
+
+	现在我们的 spawn 和 extension 中总共有 550 点能量。这已经足够建造一个身体部件为 [WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE] 的 creep 了。这个 creep 的效率是普通工作单位的 4 倍。但是这也让它变得更重，所以我们给它添加了额外的 MOVE 部件。但是，两个 MOVE 也没办法让它跑得像小 creep 那样快，除非我们给他添加 4 个 MOVE 或者修一条路。
+	孵化一个身体部件为 [WORK,WORK,WORK,CARRY,MOVE,MOVE]，名称为 HarvesterBig 的 creep 并且设为 harvester 角色。
+	
+	
+Game.spawns['Spawn1'].spawnCreep( [WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE],
+    'HarvesterBig',
+    { memory: { role: 'harvester' } } );
+    
+    
+    
+    
+    每秒可以采集8个Tick这样可以为你更好的扩展你的王国
+    因此，通过升级您的 controller，建造新的 extension 和更强大的 creep，您殖民地的效率将会被极大的提升。并且，您可以用大型的 creep 代替一群小型的 creep 来减少用于操控它们的 CPU，请记住它，这在多人游戏里非常重要。
+在下一小节中，我们将介绍如何建立起新 creep 的自动孵化机制。
+
+
+
+
+
+
+
+###############################################第四关##################################################
+
+###############################################第四关##################################################
+
+###############################################第四关##################################################
+
+*************************自动孵化creep*****************************
+
+
+
+
+
+
+	到目前为止，我们都是通过在控制台中输入命令来手动创建新的 creep。我们并不推荐经常这么做，因为 Screeps 的主旨就是让您的殖民地实现自我控制。更好的做法是教会您这个房间中的 spawn 自己生产 creep。
+这是一个相当复杂的问题，许多玩家会花费几个月的时间来完善和增强他们的自动孵化代码。但是先让我们从简单开始，来了解一些相关的基本原则。
+
+
+
+	您需要在老的 creep 因为寿命或其他原因死掉时孵化新的 creep。由于游戏中没有事件机制来报告特定 creep 的死亡。所以最简单的方式就是通过统计每种 creep 的数量，一旦其数量低于给定值，就开始孵化。
+有很多种方法可以统计指定类型的 creep 数量。其中一种就是通过 _.filter 方法以及 creep 内存中的 role 字段对 Game.creeps 进行筛选。让我们尝试一下，并把 creep 的数量显示在控制台中。
+	把 harvester 角色的 creep 数量显示在控制台中。
+	
+	
+var roleHarvester = require('role.harvester');
+var roleUpgrader = require('role.upgrader');
+
+module.exports.loop = function () {
+
+    var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
+    console.log('Harvesters: ' + harvesters.length);
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+	假设我们最少需要维持两个采集单位（harvester），最简单的办法就是：每当我们发现它们的数量小于这个值时，就执行 StructureSpawn.spawnCreep 方法。您可能还没想好它们应该叫什么（这一步我们会自动给它们起名字），但是不要忘了给他们设置需要的角色（role）。
+	我们还会添加一些新的 RoomVisual 来显示当前正在孵化的 creep。
+	在您的 main 模块中添加 StructureSpawn.spawnCreep 相关逻辑。
+文档：
+StructureSpawn.spawnCreep
+RoomVisual
+
+
+var roleHarvester = require('role.harvester');
+var roleUpgrader = require('role.upgrader');
+
+module.exports.loop = function () {
+
+    var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
+    console.log('Harvesters: ' + harvesters.length);
+
+    if(harvesters.length < 2) {
+        var newName = 'Harvester' + Game.time;
+        console.log('Spawning new harvester: ' + newName);
+        Game.spawns['Spawn1'].spawnCreep([WORK,CARRY,MOVE], newName, 
+            {memory: {role: 'harvester'}});        
+    }
+    
+    if(Game.spawns['Spawn1'].spawning) { 
+        var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
+        Game.spawns['Spawn1'].room.visual.text(
+            '🛠️' + spawningCreep.memory.role,
+            Game.spawns['Spawn1'].pos.x + 1, 
+            Game.spawns['Spawn1'].pos.y, 
+            {align: 'left', opacity: 0.8});
+    }
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+    }
+}
+
+
+
+
+
+
+	现在让我们模拟一下，当一个采集单位死掉了的情况。您可以在控制台中对指定 creep 执行 suicide 命令，或者直接在右侧的属性面板中点击 “自杀” 按钮。
+	让某个采集单位自杀。
+文档：
+Creep.suicide
+
+
+Game.creeps['Harvester1'].suicide()
+
+
+
+
+
+
+
+	还有一件事，由于死亡 creep 的内存我们之后可能会用到，所以它们并不会被自动清除。如果您每次都用随机名称去孵化新 creep 的话，内存可能会因此溢出，所以您需要在每个 tick 开始的时候将它们清除掉（creep 创建代码之前）。
+	添加清理内存的代码。
+	
+
+var roleHarvester = require('role.harvester');
+var roleUpgrader = require('role.upgrader');
+
+module.exports.loop = function () {
+
+    for(var name in Memory.creeps) {
+        if(!Game.creeps[name]) {
+            delete Memory.creeps[name];
+            console.log('Clearing non-existing creep memory:', name);
+        }
+    }
+
+    var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
+    console.log('Harvesters: ' + harvesters.length);
+
+    if(harvesters.length < 2) {
+        var newName = 'Harvester' + Game.time;
+        console.log('Spawning new harvester: ' + newName);
+        Game.spawns['Spawn1'].spawnCreep([WORK,CARRY,MOVE], newName, 
+            {memory: {role: 'harvester'}});
+    }
+    
+    if(Game.spawns['Spawn1'].spawning) { 
+        var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
+        Game.spawns['Spawn1'].room.visual.text(
+            '🛠️' + spawningCreep.memory.role,
+            Game.spawns['Spawn1'].pos.x + 1, 
+            Game.spawns['Spawn1'].pos.y, 
+            {align: 'left', opacity: 0.8});
+    }
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+	现在，死者的内存被回收掉了，这有助于帮助我们节省资源。
+	除了在老 creep 死掉之后再创建一个新的，还有其他的方法可以把 creep 的数量维持在期望值：StructureSpawn.renewCreep 方法。不过在本教程中 creep 的老化已经被禁用了，所以我们建议您自己尝试了解一下。
+文档：
+StructureSpawn.renewCreep
+
+
+
+
+
+
+
+
+
+###############################################第五关##################################################
+
+###############################################第五关##################################################
+
+###############################################第五关##################################################
+
+*************************防守您的房间*****************************
+
+
+
+
+
+
+Screeps 的世界并不安全。其他玩家可能想要占领您的领土。此外，您的房间也会偶尔遭到中立 NPC creep 的袭击。所以，您需要好好考虑下殖民地的防御，这样您才能更加安全的发展自己。
+
+文档：
+防御您的房间(https://screeps-cn.gitee.io/defense.html)
+
+
+
+
+	敌方 creep 从房间左边的入口入侵并袭击了您的殖民地。由于我们有墙壁可以暂时抵挡它的进攻，所以目前问题不大。但是墙壁迟早会被打穿，所以我们需要尽快解决这个问题。
+
+
+
+
+	抵御进攻最可靠的方法就是使用房间的 安全模式（Safe Mode）。在安全模式中，房间中任何非己方 creep 都无法执行任何有害的操作（但是您依旧可以进行反抗。）
+	安全模式是通过房间控制器（controller）激活的，不过首先我们要有可用的激活次数。现在让我们在房间中启动安全模式。
+	激活安全模式。
+文档：
+StructureController.activateSafeMode
+
+
+Game.spawns['Spawn1'].room.controller.activateSafeMode();
+
+
+
+
+
+
+
+
+	如您所见，敌方 creep 已经不再进攻墙壁了 - 它的有害操作被阻止了。我们建议您在房间的防御失效时再激活安全模式。
+	现在，让我们把这些不速之客清理掉。
+
+
+
+	防御塔（tower）是防御房间最简单直接的手段。它们可以消耗能量来治疗或攻击房间中的任何 creep。治疗/攻击效果取决于 tower 和目标之间的直线距离。
+	首先，让我们给新 tower 打好地基。您可以在墙壁之内的任何位置放置 tower 的工地，通过顶部面板中的 “建造” 按钮找到它。
+	放置 Tower 的工地（手动或使用下面的代码）。
+文档：
+StructureTower
+Room.createConstructionSite
+
+
+Game.spawns['Spawn1'].room.createConstructionSite( 23, 22, STRUCTURE_TOWER );
+
+
+	creep Builder1 立刻反应过来并开始了建造。现在让我们等它造好。
+	
+	
+	
+	tower 需要能量，所以让我们改造一下 harvester 角色，让其可以把能量带到 tower 和其他建筑中。想要实现这个功能，您需要将 STRUCTURE_TOWER 常量添加到用于筛选您采集单位目标的 filter 中。
+	在 role.harvester 模块中添加 STRUCTURE_TOWER，然后等待能量运送到 tower 中。
+	
+	
+var roleHarvester = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+	    if(creep.store.getFreeCapacity() > 0) {
+            var sources = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+        }
+        else {
+            var targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_EXTENSION ||
+                                structure.structureType == STRUCTURE_SPAWN ||
+                                structure.structureType == STRUCTURE_TOWER) && 
+                                structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    }
+            });
+            if(targets.length > 0) {
+                if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+        }
+	}
+};
+
+module.exports = roleHarvester;
+
+
+
+
+
+
+
+
+	棒极了，您的 tower 已经准备就绪了！
+	就像 creep 一样，tower 也有几个类似的方法：attack - 攻击，heal - 治疗，以及 repair - 维修。每个操作都会消耗 10 点能量。一旦发现了敌人，我们就需要使用 attack 方法攻击距离最近的敌方 creep。请记住，距离非常重要：在相同的能量消耗下，操作带来的效果可能会有好几倍的差距。
+	想要获取 tower 的对象，您可以使用它的 ID（右侧面板中）以及 Game.getObjectById 方法。
+	使用 tower 消灭敌方 creep。
+文档：
+Game.getObjectById
+RoomObject.pos
+RoomPosition.findClosestByRange
+StructureTower.attack
+
+
+var roleHarvester = require('role.harvester');
+var roleUpgrader = require('role.upgrader');
+var roleBuilder = require('role.builder');
+
+module.exports.loop = function () {
+
+    var tower = Game.getObjectById('39ddca24979bed2599f6f782');
+    if(tower) {
+        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        if(closestHostile) {
+            tower.attack(closestHostile);
+        }
+    }
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+        if(creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
+        }
+    }
+}
+
+
+
+
+
+	敌方蠕虫终于死了，我们松了一口气，但是还是对墙壁造成了伤害。
+我推荐增加自动维修系统。
+
+
+
+
+
+
+
+	creep 和 tower 都可以修复受损的建筑，这次让我们用 tower 来试一下。使用 repair 方法可以完成这个任务。除此之外，您还需要使用 Room.find 方法和一个 filter 去筛选除那些受损的墙壁（wall）。
+	请注意，由于墙壁不属于任何玩家，所以我们需要使用 FIND_STRUCTURES 常量进行搜索而不是 FIND_MY_STRUCTURES。
+	修复所有受损的墙壁（wall）。
+文档：
+Room.find
+StructureTower.repair
+
+
+var roleHarvester = require('role.harvester');
+var roleUpgrader = require('role.upgrader');
+var roleBuilder = require('role.builder');
+
+module.exports.loop = function () {
+
+    var tower = Game.getObjectById('39ddca24979bed2599f6f782');
+    if(tower) {
+        var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: (structure) => structure.hits < structure.hitsMax
+        });
+        if(closestDamagedStructure) {
+            tower.repair(closestDamagedStructure);
+        }
+
+        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        if(closestHostile) {
+            tower.attack(closestHostile);
+        }
+    }
+
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if(creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+        if(creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+	所有在袭击中受损的建筑都被修好了！
+	恭喜，您已经完成了全部的教程！现在您已经有足够的知识和代码可以在线上模式中游玩了。挑选您的房间，建立殖民地，然后按照您的意愿在 Screeps 的世界中建立统治！
+	
+如果您想更深入的了解游戏或者有任何疑问，请随时参考：
+文档(http://docs.screeps.com/)
+论坛(https://screeps.com/forum/)
+Discord server(http://chat.screeps.com/)
+Have fun scripting!
