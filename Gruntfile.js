@@ -11,7 +11,7 @@ module.exports = function(grunt) {
                 //server: 'season'
             },
             dist: {
-                src: ['*.js']
+                src: ['main/*.js']
             }
         }
     });
