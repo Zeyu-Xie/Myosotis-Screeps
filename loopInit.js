@@ -1,11 +1,4 @@
-/*
- * Module code goes here. Use 'module.exports' to export things:
- * module.exports.thing = 'a thing';
- *
- * You can import it from another modules like this:
- * var mod = require('loop.init');
- * mod.thing == 'a thing'; // true
- */
+var init = require("init")
 
 var loopInit = function () {
 
@@ -22,6 +15,7 @@ var loopInit = function () {
     printStorageInfo()
     printRclInfo()
     printCreepsInfo()
+    printConstructionSitesInfo()
 
     console.log("--------")
     console.log("Loop Starts")
@@ -31,29 +25,30 @@ module.exports = loopInit
 
 var printCreepsInfo = function () {
 
-    var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-    var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-    var repairers = _.filter(Game.creeps, (creep) => creep.memory.role == "repairer");
-    var healers = _.filter(Game.creeps, (creep) => creep.memory.role == "healer");
+    var harvesters = init.harvesters
+    var upgraders = init.upgraders
+    var builders = init.builders
+    var repairers = init.repairers
+    var healers = init.healers
 
-    const strArray = ["harvesters", "builders", "upgraders", "repairers", "healers"]
+    var roleList = init.roleList
+
     const numArray = [harvesters.length, builders.length, upgraders.length, repairers.length, healers.length]
-    const num = strArray.length
+    const num = roleList.length
 
     var l1 = ""
     var l2 = ""
 
     for (var i = 0; i < num; i++) {
-        l1 = l1 + " |" + strArray[i].padStart(12, " ")
+        l1 = l1 + " |" + roleList[i].padStart(12, " ")
         l2 = l2 + " |" + String(numArray[i]).padStart(12, " ")
     }
 
     l1 = (l1 + " |").substring(1)
     l2 = (l2 + " |").substring(1)
 
-    console.log("* Creep Numbers: " + l1)
-    console.log("                 " + l2)
+    console.log("* Creep: Numbers: " + l1)
+    console.log("                  " + l2)
 }
 
 var printResourceInfo = function () {
@@ -73,4 +68,8 @@ var printStorageInfo = function () {
 
 var printRclInfo = function () {
     console.log("* RCL: Lv: " + Game.spawns["Spawn1"].room.controller.level + ", Progress: " + Game.spawns["Spawn1"].room.controller.progress + "/" + Game.spawns["Spawn1"].room.controller.progressTotal)
+}
+
+var printConstructionSitesInfo = function () {
+    console.log("* Construction Sites: Num: " + Game.spawns["Spawn1"].room.find(FIND_MY_CONSTRUCTION_SITES).length)
 }
