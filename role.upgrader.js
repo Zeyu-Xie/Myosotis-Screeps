@@ -1,3 +1,5 @@
+const harvest = require("harvest")
+
 var roleUpgrader = {
 
     /** @param {Creep} creep **/
@@ -21,10 +23,7 @@ var roleUpgrader = {
         }
         // 采集中：显示路径
         else {
-            var sources = creep.room.find(FIND_SOURCES);
-            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
-            }
+            harvest(creep)
         }
 	}
 };
