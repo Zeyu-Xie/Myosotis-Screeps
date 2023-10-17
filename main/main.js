@@ -2,15 +2,21 @@
 // var loopEnd = require("loopEnd");
 // var spawn = require("spawn")
 // var work = require("work")
-var test = require("test")
-
+const init = require("init")
+const initPrint = require("initPrint")
+const clearMemory = require("clearMemory")
+const endPrint = require("endPrint")
 
 module.exports.loop = function () {
+    const initData = init()
 
-    console.log(test().room)
+    
 
-    // loopInit()
+    initPrint()
     // spawn()
     // work()
-    // loopEnd()
+
+    clearMemory()
+
+    endPrint()
 }
