@@ -7,7 +7,7 @@ const init = () => {
 
     // room
 
-    const roomName = "E1S39"
+    const roomName = "sim"
     const room = Game.rooms[roomName]
 
     // rcl
