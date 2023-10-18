@@ -1,10 +1,7 @@
 const init = require("init")
-let once = true
-
 let map = Array.from({ length: 50 }, () => Array(50).fill(0));
 
-module.exports.loop = function () {
-    if (!once) return
+const screenShoter = function () {
     const initData = init()
     for (var i = 0; i < 50; i++) {
         for (var j = 0; j < 50; j++) {
@@ -14,7 +11,6 @@ module.exports.loop = function () {
         }
     }
     printMap()
-    once = false
 }
 
 const printMap = () => {
@@ -41,7 +37,7 @@ const simplify = function (point) {
     if(point.type == "structure") {
         switch(point.structure.structureType) {
             case "spawn": {
-                return " S"
+                return "SP"
             }
             case "controller": {
                 return " C"
@@ -72,3 +68,5 @@ const simplify = function (point) {
     }
     else return "  "
 }
+
+module.exports = screenShoter
