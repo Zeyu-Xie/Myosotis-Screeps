@@ -9,6 +9,8 @@ const init = () => {
 
     const roomName = "sim"
     const room = Game.rooms[roomName]
+    const energyAvailable = room.energyAvailable
+    const energyCapacityAvailable = room.energyCapacityAvailable
 
     // rcl
 
@@ -55,7 +57,7 @@ const init = () => {
     roleMap.set("repairer", 3)
     roleMap.set("healer", 4)
     const roleList = ["harvester", "builder", "upgrader", "repairer", "healer"]
-    const numList = [8, 6, 2, 3, 0]
+    const numList = [4, 3, 1, 1, 0]
     const bodyPartList = [
         [
             [WORK, CARRY, MOVE],
@@ -85,6 +87,8 @@ const init = () => {
 
         roomName: roomName,
         room: room,
+        energyAvailable: energyAvailable,
+        energyCapacityAvailable: energyCapacityAvailable,
 
         rcl: rcl,
         rclLevel: rclLevel,
