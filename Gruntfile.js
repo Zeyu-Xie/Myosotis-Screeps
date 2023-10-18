@@ -7,11 +7,11 @@ module.exports = function(grunt) {
             options: {
                 email: 'xie.zeyu20@gmail.com',
                 token: 'dbb7bcd1-abdb-47ca-a719-e0e0c542bd19',
-                branch: 'Myosotis-Screeps',
+                branch: 'tutorial-5',
                 //server: 'season'
             },
             dist: {
-                src: ['main/*.js']
+                src: ['tutorial-5/*.js']
             }
         }
     });
