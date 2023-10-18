@@ -37,10 +37,10 @@ const simplify = function (point) {
     if(point.type == "structure") {
         switch(point.structure.structureType) {
             case "spawn": {
-                return "SP"
+                return "Sp"
             }
             case "controller": {
-                return " C"
+                return "Co"
             }
             default: {
                 return " ?"
@@ -49,6 +49,9 @@ const simplify = function (point) {
     }
     else if (point.type == "creep") {
         return " o"
+    }
+    else if (point.type == "source") {
+        return " $"
     }
     else if(point.type == "terrain") {
         switch (point.terrain) {
@@ -66,7 +69,10 @@ const simplify = function (point) {
             }
         }
     }
-    else return "  "
+    else {
+        // console.log(point.type)
+        return "PP"
+    }
 }
 
 module.exports = screenShoter
