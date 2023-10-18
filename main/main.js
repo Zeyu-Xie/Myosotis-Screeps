@@ -12,7 +12,7 @@ let once = false
 
 module.exports.loop = function () {
 
-    initPrint()
+    // initPrint()
 
     if(!once) {
         screenShoter()
@@ -62,5 +62,5 @@ module.exports.loop = function () {
         }
     }
 
-    endPrint()
+    // endPrint()
 }
